@@ -1,15 +1,21 @@
 ROM ?= roms/snake.ch8
-main: main.c 
-	gcc -Wall -Wextra main.c -o main 
+CC = gcc
+CFLAGS = -Wall -Wextra
+SRC = main.c $(wildcard utilities/*.c)
+HDRS = $(wildcard *.h) $(wildcard headers/*.h)
 
-debug: main.c 
-	gcc -Wall -Wextra -g -O0 main.c -o main
+main: $(SRC) $(HDRS)
+	$(CC) $(CFLAGS) $(SRC) -o main
 
-release: main.c 
-	gcc -Wall -Wextra -O3 main.c -o main
+debug: $(SRC) $(HDRS)
+	$(CC) $(CFLAGS) -g -O0 $(SRC) -o main
+
+release: $(SRC) $(HDRS)
+	$(CC) $(CFLAGS) -O3 $(SRC) -o main
 
 run: main
 	./main $(ROM)
 
 clean:
 	rm -f main
+
