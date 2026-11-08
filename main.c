@@ -6,9 +6,12 @@
 #include "headers/loaders.h"
 #include "raylib.h"
 
+#define SCALE 10
+
 int main(int argc, char *argv[]) {
     chip8 c8 = init_chip8();
-    InitWindow(640, 320, "Chip-8 Emulator");
+    // TODO add strcmp to compare the flags passed
+    InitWindow(64 * SCALE, 32 * SCALE, "Chip-8 Emulator");
     SetTargetFPS(60);
     load_fontset(c8.memory);
     if (load_rom(c8.memory, argc, argv) == 1) {
@@ -33,7 +36,7 @@ int main(int argc, char *argv[]) {
         for (int y = 0; y < 32; y++) {
             for (int x = 0; x < 64; x++) {
                 if (c8.screen[y][x] == 1) {
-                    DrawRectangle(x * 10, y * 10, 10, 10, BLUE);
+                    DrawRectangle(x * SCALE, y * SCALE, 10, 10, BLUE);
                 }
             }
         }

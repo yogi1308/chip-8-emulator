@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <stdbool.h>
 #define MEMORY_SIZE 4096
 #define PC_START_ADDRESS 0x200
 #define FONT_SET_START_ADDRESS 0x50

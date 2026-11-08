@@ -138,36 +138,40 @@ int execute(decoded_opcode d_op, chip8 *c8, int argc, char *argv[]) {
                     return 0;
                 }
                 case 6: {
+                    // TODO
                     char shifted_out_bit;
-                    if (argc == 3) {
-                        if (argc[3] == "shift-in-place") {
-                            shifted_out_bit = c8->registers[d_op.x];
-                            c8->registers[d_op.x] = c8->registers[d_op.x] >> 1;
-                            return 0;
-                        } else {
-                            fprintf(stderr, "Unknown arg 3");
-                            return 1;
-                        }
-                    }
+                    /* if (argc == 3) { */
+                    /*     if (argc[3] == "shift-in-place") { */
+                    /*         shifted_out_bit = c8->registers[d_op.x]; */
+                    /*         c8->registers[d_op.x] = c8->registers[d_op.x] >> 1; */
+                    /*         return 0; */
+                    /*     } else { */
+                    /*         fprintf(stderr, "Unknown arg 3"); */
+                    /*         return 1; */
+                    /*     } */
+                    /* } */
                     shifted_out_bit = c8->registers[d_op.y];
                     c8->registers[d_op.x] = c8->registers[d_op.y];
                     c8->registers[d_op.x] = c8->registers[d_op.x] >> 1;
+                    return 0;
                 }
                 case 0xE: {
+                    // TODO
                     char shifted_out_bit;
-                    if (argc == 3) {
-                        if (argc[3] == "shift-in-place") {
-                            shifted_out_bit = c8->registers[d_op.x];
-                            c8->registers[d_op.x] = c8->registers[d_op.x] >> 1;
-                            return 0;
-                        } else {
-                            fprintf(stderr, "Unknown arg 3");
-                            return 1;
-                        }
-                    }
+                    /* if (argc == 3) { */
+                    /*     if (argc[3] == "shift-in-place") { */
+                    /*         shifted_out_bit = c8->registers[d_op.x]; */
+                    /*         c8->registers[d_op.x] = c8->registers[d_op.x] >> 1; */
+                    /*         return 0; */
+                    /*     } else { */
+                    /*         fprintf(stderr, "Unknown arg 3"); */
+                    /*         return 1; */
+                    /*     } */
+                    /* } */
                     shifted_out_bit = c8->registers[d_op.y];
                     c8->registers[d_op.x] = c8->registers[d_op.y];
                     c8->registers[d_op.x] = c8->registers[d_op.x] >> 1;
+                    return 0;
                 }
                 default:
                     fprintf(stderr, "Unknown opcode 0x%04X at 0x%04X\n", d_op.op, c8->pc - 2);

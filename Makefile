@@ -1,4 +1,4 @@
-ROM ?= roms/snake.ch8
+ROM ?= tests/IBM_Logo.ch8
 CC = gcc
 CFLAGS = -Wall -Wextra -lraylib
 SRC = main.c $(wildcard utilities/*.c)
