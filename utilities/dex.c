@@ -39,14 +39,34 @@ decoded_opcode decode(uint16_t opcode) {
 int execute(decoded_opcode d_op, chip8 *c8) {
     switch (d_op.first_nibble) {
         case 0x0:
-            for (int y = 0; y < 32; y++) {
-                for (int x = 0; x < 64; x++) {
-                    c8->screen[y][x] = 0;
-                }
+            switch (d_op.nnn) {
+                case 0x0E0:
+                    for (int y = 0; y < 32; y++) {
+                        for (int x = 0; x < 64; x++) {
+                            c8->screen[y][x] = 0;
+                        }
+                    }
+                    return 0;
+                case 0x0EE:
+                    c8->stack_pointer--;
+                    c8->pc = c8->stack[c8->stack_pointer];
+                    return 0;
+                default:
+                    return 1;
             }
-            return 0;
         case 0x1:
             c8->pc = d_op.nnn;
+            return 0;
+        case 0x2:
+            c8->stack[c8->stack_pointer] = c8->pc;
+            c8->stack_pointer++;
+            c8->pc = d_op.nnn;
+            return 0;
+        case 0x3:
+            return 0;
+        case 0x4:
+            return 0;
+        case 0x5:
             return 0;
         case 0x6:
             c8->registers[d_op.x] = d_op.nn;
@@ -54,8 +74,16 @@ int execute(decoded_opcode d_op, chip8 *c8) {
         case 0x7:
             c8->registers[d_op.x] = c8->registers[d_op.x] + d_op.nn;
             return 0;
+        case 0x8:
+            return 0;
+        case 0x9:
+            return 0;
         case 0xA:
             c8->I = d_op.nnn;
+            return 0;
+        case 0xB:
+            return 0;
+        case 0xC:
             return 0;
         case 0xD: {
             // sprites are 8 pixel wide and n pixels tall
@@ -65,7 +93,6 @@ int execute(decoded_opcode d_op, chip8 *c8) {
             uint16_t sprite_addr = c8->I;
 
             for (int i = 0; i < h; i++) {
-                int shift = 0;
                 uint8_t sprite = c8->memory[sprite_addr + i];
                 c8->registers[0xF] = 0;
                 for (int j = 0; j < 8; j++) {
@@ -81,6 +108,10 @@ int execute(decoded_opcode d_op, chip8 *c8) {
             }
             return 0;
         }
+        case 0xE:
+            return 0;
+        case 0xF:
+            return 0;
         default:
             printf("Unknown opcode 0x%04X at 0x%04X\n", d_op.op, c8->pc - 2);
             return 1;

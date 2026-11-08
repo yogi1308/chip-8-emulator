@@ -15,14 +15,15 @@ typedef struct chip8 {
     int screen[32][64];
     int delay_timer;
     int sound_timer;
-
+    uint16_t stack[16];
+    int stack_pointer;
 } chip8;
 
 static inline chip8 init_chip8(void) {
     chip8 c8 = {0};
     c8.pc = PC_START_ADDRESS;
     c8.delay_timer = 60;
-    c8.sound_timer = 60;
+    c8.sound_timer = 0;
     return c8;
 }
 
