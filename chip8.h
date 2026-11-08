@@ -12,12 +12,17 @@ typedef struct chip8 {
     uint8_t memory[MEMORY_SIZE];
     uint8_t registers[NUM_REGISTERS];
     uint16_t I;
+    int screen[32][64];
+    int delay_timer;
+    int sound_timer;
 
 } chip8;
 
 static inline chip8 init_chip8(void) {
     chip8 c8 = {0};
     c8.pc = PC_START_ADDRESS;
+    c8.delay_timer = 60;
+    c8.sound_timer = 60;
     return c8;
 }
 

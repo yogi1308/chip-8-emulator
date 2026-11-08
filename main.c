@@ -1,20 +1,25 @@
 #include <stdint.h>
 #include <stdio.h>
+
 #include "chip8.h"
-#include "headers/loaders.h"
 #include "headers/dex.h"
+#include "headers/loaders.h"
+#include "raylib.h"
 
 int main(int argc, char *argv[]) {
     chip8 c8 = init_chip8();
-
+    InitWindow(640, 320, "Chip-8 Emulator");
+    SetTargetFPS(60);
     load_fontset(c8.memory);
     if (load_rom(c8.memory, argc, argv) == 1) {
         return 1;
     }
 
-    printf("0x%02X\n", c8.pc);
-    int executions = 0;
-    while (executions < 20) {
+    while (!WindowShouldClose()) {
+        // Update variables here
+        c8.delay_timer--;
+        c8.sound_timer--;
+        printf("0x%02X\n", c8.pc);
         c8.opcode = fetch(c8.memory, c8.pc);
         c8.pc += 2;
         decoded_opcode d_op = decode(c8.opcode);
@@ -22,8 +27,22 @@ int main(int argc, char *argv[]) {
         if (execute(d_op, &c8) != 0) {
             return 1;
         }
-        executions++;
+        // Draw everything
+        BeginDrawing();
+        ClearBackground(BLACK);
+        for (int y = 0; y < 32; y++) {
+            for (int x = 0; x < 64; x++) {
+                if (c8.screen[y][x] == 1) {
+                    DrawRectangle(x * 10, y * 10, 10, 10, BLUE);
+                }
+            }
+        }
+
+        EndDrawing();
     }
+
+    // De-initialize and close window
+    CloseWindow();
 
     // print memory
     /* for (int i = 0; i < MEMORY_SIZE; i++) { */

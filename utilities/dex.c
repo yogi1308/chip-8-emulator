@@ -1,7 +1,9 @@
 #include "../headers/dex.h"
-#include "../chip8.h"
+
 #include <stdint.h>
 #include <stdio.h>
+
+#include "../chip8.h"
 uint16_t fetch(uint8_t *memory, uint16_t pc) { return (memory[pc] << 8) | memory[pc + 1]; }
 
 void print_decoded_opcode(decoded_opcode d_op, uint16_t opcode) {
@@ -36,6 +38,13 @@ decoded_opcode decode(uint16_t opcode) {
 
 int execute(decoded_opcode d_op, chip8 *c8) {
     switch (d_op.first_nibble) {
+        case 0x0:
+            for (int y = 0; y < 32; y++) {
+                for (int x = 0; x < 64; x++) {
+                    c8->screen[y][x] = 0;
+                }
+            }
+            return 0;
         case 0x1:
             c8->pc = d_op.nnn;
             return 0;
@@ -48,9 +57,32 @@ int execute(decoded_opcode d_op, chip8 *c8) {
         case 0xA:
             c8->I = d_op.nnn;
             return 0;
+        case 0xD: {
+            // sprites are 8 pixel wide and n pixels tall
+            uint8_t x = c8->registers[d_op.x] % 64;
+            uint8_t y = c8->registers[d_op.y] % 32;
+            uint8_t h = d_op.n;
+            uint16_t sprite_addr = c8->I;
+
+            for (int i = 0; i < h; i++) {
+                int shift = 0;
+                uint8_t sprite = c8->memory[sprite_addr + i];
+                c8->registers[0xF] = 0;
+                for (int j = 0; j < 8; j++) {
+                    int curr = c8->screen[y + i][x + j];
+                    int bit = (sprite >> (7 - j)) & 0x1;
+                    if ((y + i) < 32 && (x + j) < 64) {
+                        c8->screen[y + i][x + j] = curr ^ bit;
+                        if ((curr ^ bit) == 1) {
+                            c8->registers[0xF] = 1;
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
         default:
             printf("Unknown opcode 0x%04X at 0x%04X\n", d_op.op, c8->pc - 2);
             return 1;
     }
 }
-

@@ -95,3 +95,26 @@ vim.keymap.set("n", "<leader>cd", function()
 		end)
 	end)
 end, { desc = "Build debug with Makefile (background)" })
+
+vim.keymap.set("n", "<leader>dc", function()
+    local dap = require("dap")
+    if dap.session() then
+        dap.continue()   -- already debugging: resume / step past breakpoint
+        return
+    end
+    local root = vim.fn.getcwd()
+    local program = root .. "/main"
+    if vim.fn.filereadable(program) ~= 1 then
+        vim.notify("No `main` binary — run <leader>cd first", vim.log.levels.ERROR)
+        return
+    end
+    dap.run({
+        name = "chip8",
+        type = "codelldb",
+        request = "launch",
+        program = program,
+        args = { "tests/IBM_Logo.ch8" },
+        cwd = root,
+        stopOnEntry = false,
+    })
+end, { desc = "Debug chip8 (continue or start with ROM)" })
