@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
         c8.pc += 2;
         decoded_opcode d_op = decode(c8.opcode);
         print_decoded_opcode(d_op, c8.opcode);
-        if (execute(d_op, &c8) != 0) {
+        if (execute(d_op, &c8, argc, argv) != 0) {
             return 1;
         }
         // Draw everything

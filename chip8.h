@@ -17,6 +17,7 @@ typedef struct chip8 {
     int sound_timer;
     uint16_t stack[16];
     int stack_pointer;
+    bool shift_uses_vy;
 } chip8;
 
 static inline chip8 init_chip8(void) {
