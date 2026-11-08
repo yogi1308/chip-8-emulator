@@ -1,0 +1,24 @@
+# Base style. Every option below only overrides an LLVM default.
+BasedOnStyle: LLVM
+
+# 4-space indent, with switch/case labels indented one level.
+IndentWidth: 4
+IndentCaseLabels: true
+
+# Wrap lines at 100 columns.
+ColumnLimit: 120
+
+# When a call or declaration wraps, put one argument/parameter per line and
+# indent by ContinuationIndentWidth rather than aligning to the open paren.
+AlignAfterOpenBracket: DontAlign
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackParameters: false
+
+# Regroup includes into system (<...>) then local ("..."), sorted within each.
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<.*>$'
+    Priority: 1
+  - Regex: '^"'
+    Priority: 2
