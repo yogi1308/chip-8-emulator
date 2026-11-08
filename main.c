@@ -6,6 +6,14 @@
 #define FONT_SET_START_ADDRESS 0x50
 #define FONTSET_SIZE 80
 
+typedef struct decoded_opcode {
+    int x;
+    int y;
+    int n;
+    uint8_t nn;
+    uint16_t nnn; // lower 4 bits are zeros
+} decoded_opcode;
+
 void load_fontset(uint8_t *memory) {
     uint8_t fontset[FONTSET_SIZE] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -58,6 +66,31 @@ int load_rom(uint8_t *memory, int argc, char *argv[]) {
     return 0;
 }
 
+uint16_t fetch(uint8_t *memory, uint16_t pc) { return (memory[pc] << 8) | memory[pc + 1]; }
+
+decoded_opcode decode(uint16_t opcode) {
+    int x = (opcode >> 8) & 0x0F; // 2nd nibble used to look up one of the 16 8-bit registers
+    int y = (opcode >> 4) & 0x0F; // 3rd nibble also used to look up one of the 16 registers
+    int n = opcode & 0x0F;        // The fourth nibble. A 4-bit number.
+    uint8_t nn = opcode & 0x00FF; // The second byte (third and fourth nibbles). An 8-bit immediate number.
+    // lower 4bits are zeroes. The second, third and fourth nibbles. A 12-bit immediate memory address.
+    uint16_t nnn = opcode & 0x0FFF;
+    printf("opcode = %04X\n", opcode);
+    printf("x = %01X\n", x);
+    printf("y = %01X\n", y);
+    printf("n = %01X\n", n);
+    printf("nn = %02X\n", nn);
+    printf("nnn = %04X\n", nnn);
+    printf("opcode = %04X\n", opcode);
+    decoded_opcode d_op;
+    d_op.x = x;
+    d_op.y = y;
+    d_op.n = n;
+    d_op.nn = nn;
+    d_op.nnn = nnn;
+    return d_op;
+}
+
 int main(int argc, char *argv[]) {
     uint16_t pc = PC_START_ADDRESS;
     uint16_t opcode;
@@ -68,9 +101,15 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    printf("0x%02X\n", pc);
+    opcode = fetch(memory, pc);
+    pc += 2;
+    decoded_opcode d_op = decode(opcode);
+    printf("0x%04X\n", opcode);
+
     // print memory
-    for (int i = 0; i < MEMORY_SIZE; i++) {
-        printf("0x%02X\n", memory[i]);
-    }
+    /* for (int i = 0; i < MEMORY_SIZE; i++) { */
+    /*     printf("0x%02X %d\n", memory[i], i); */
+    /* } */
     return 0;
 }

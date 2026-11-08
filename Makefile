@@ -1,4 +1,4 @@
-ROM ?= roms/ssnake.ch8
+ROM ?= roms/snake.ch8
 main: main.c 
 	gcc -Wall -Wextra main.c -o main 
 
