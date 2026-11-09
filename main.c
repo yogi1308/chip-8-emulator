@@ -11,13 +11,26 @@
 
 #define SCALE 10
 
+void check_key_pressed(chip8 *c8) {
+    const char *keys = "X123QWEASDZC4RFV";
+    if (c8->hex_keys) {
+        keys = "0123456789ABCDEF";
+    }
+    c8->key_pressed = -1;
+    for (int k = 0; k < 16; k++) {
+        if (IsKeyDown(keys[k])) {
+            c8->key_pressed = k;
+            break;
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
     srand(time(NULL));
     chip8 c8 = init_chip8();
     if (load_flags(&c8, argc, argv) == 1) {
         return 1;
     }
-    // TODO add strcmp to compare the flags passed
     load_fontset(c8.memory);
     if (load_rom(c8.memory, argc, argv) == 1) {
         return 1;
@@ -34,9 +47,11 @@ int main(int argc, char *argv[]) {
         c8.pc += 2;
         decoded_opcode d_op = decode(c8.opcode);
         print_decoded_opcode(d_op, c8.opcode);
+        check_key_pressed(&c8);
         if (execute(d_op, &c8) != 0) {
             return 1;
         }
+
         // Draw everything
         BeginDrawing();
         ClearBackground(BLACK);

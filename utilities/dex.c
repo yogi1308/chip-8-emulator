@@ -1,8 +1,8 @@
 #include "../headers/dex.h"
 
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../chip8.h"
 
@@ -180,7 +180,6 @@ int execute(decoded_opcode d_op, chip8 *c8) {
             c8->pc = d_op.nnn + c8->registers[0x0];
             return 0;
         case 0xC:
-            srand(time(NULL));
             c8->registers[d_op.x] = rand() & d_op.nn;
             return 0;
         case 0xD: {
@@ -207,8 +206,51 @@ int execute(decoded_opcode d_op, chip8 *c8) {
             return 0;
         }
         case 0xE:
+            switch (d_op.nn) {
+                case 0x9E:
+                    if (c8->key_pressed == c8->registers[d_op.x]) {
+                        c8->pc += 2;
+                    }
+                    break;
+                case 0xA1:
+                    if (c8->key_pressed != c8->registers[d_op.x]) {
+                        c8->pc += 2;
+                    }
+                    break;
+                default:
+                    fprintf(stderr, "Unknown opcode 0x%04X at 0x%04X\n", d_op.op, c8->pc - 2);
+                    return 1;
+            }
             return 0;
         case 0xF:
+            switch (d_op.nn) {
+                case 0x07:
+                    c8->registers[d_op.x] = c8->delay_timer;
+                    break;
+                case 0x15:
+                    c8->delay_timer = c8->registers[d_op.x];
+                    break;
+                case 0x18:
+                    c8->sound_timer = c8->registers[d_op.x];
+                    break;
+                case 0x1E:
+                    c8->I += c8->registers[d_op.x];
+                case 0x0A:
+                    if (c8->key_pressed != -1) {
+                        c8->registers[d_op.x] = c8->key_pressed;
+                        return 0;
+                    }
+                    c8->pc -= 2;
+                    break;
+                case 0x29:
+                    c8->I = c8->registers[d_op.x];
+                    break;
+                case 0x33:
+                    uint8_t val = c8->registers[d_op.x];
+                    c8->memory[c8->I] = (val / 100);
+                    c8->memory[c8->I + 1] = (val % 100) / 10;
+                    c8->memory[c8->I + 2] = val % 10;
+            }
             return 0;
         default:
             fprintf(stderr, "Unknown opcode 0x%04X at 0x%04X\n", d_op.op, c8->pc - 2);

@@ -20,6 +20,8 @@ typedef struct chip8 {
     int stack_pointer;
     bool shift_uses_vy;
     bool bxnn;
+    bool hex_keys;
+    int key_pressed;
 } chip8;
 
 static inline chip8 init_chip8(void) {
@@ -27,6 +29,7 @@ static inline chip8 init_chip8(void) {
     c8.pc = PC_START_ADDRESS;
     c8.delay_timer = 60;
     c8.sound_timer = 0;
+    c8.key_pressed = -1;
     return c8;
 }
 
