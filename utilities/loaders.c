@@ -17,7 +17,11 @@ int load_flags(chip8 *c8, int argc, char *argv[]) {
         if (argv[i][0] == '-') {
             if (strcmp(argv[i], "--shift-uses-vy") == 0) {
                 c8->shift_uses_vy = true;
-            } else {
+            } 
+            else if (strcmp(argv[i], "--bxnn") == 0) {
+                c8->bxnn = true;
+            }
+            else {
                 fprintf(stderr, "Unknown flag %s\n", argv[i]);
                 return 1;
             }

@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "chip8.h"
 #include "headers/dex.h"
@@ -10,6 +12,7 @@
 #define SCALE 10
 
 int main(int argc, char *argv[]) {
+    srand(time(NULL));
     chip8 c8 = init_chip8();
     if (load_flags(&c8, argc, argv) == 1) {
         return 1;

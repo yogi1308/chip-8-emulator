@@ -1,5 +1,6 @@
 #include "../headers/dex.h"
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -172,8 +173,15 @@ int execute(decoded_opcode d_op, chip8 *c8) {
             c8->I = d_op.nnn;
             return 0;
         case 0xB:
+            if (c8->bxnn) {
+                c8->pc = d_op.nnn + c8->registers[d_op.x];
+                return 0;
+            }
+            c8->pc = d_op.nnn + c8->registers[0x0];
             return 0;
         case 0xC:
+            srand(time(NULL));
+            c8->registers[d_op.x] = rand() & d_op.nn;
             return 0;
         case 0xD: {
             // sprites are 8 pixel wide and n pixels tall

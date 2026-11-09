@@ -19,6 +19,7 @@ typedef struct chip8 {
     uint16_t stack[16];
     int stack_pointer;
     bool shift_uses_vy;
+    bool bxnn;
 } chip8;
 
 static inline chip8 init_chip8(void) {
