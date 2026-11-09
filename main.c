@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -10,14 +11,17 @@
 
 int main(int argc, char *argv[]) {
     chip8 c8 = init_chip8();
+    if (load_flags(&c8, argc, argv) == 1) {
+        return 1;
+    }
     // TODO add strcmp to compare the flags passed
-    InitWindow(64 * SCALE, 32 * SCALE, "Chip-8 Emulator");
-    SetTargetFPS(60);
     load_fontset(c8.memory);
     if (load_rom(c8.memory, argc, argv) == 1) {
         return 1;
     }
 
+    InitWindow(64 * SCALE, 32 * SCALE, "Chip-8 Emulator");
+    SetTargetFPS(60);
     while (!WindowShouldClose()) {
         // Update variables here
         c8.delay_timer--;
@@ -27,7 +31,7 @@ int main(int argc, char *argv[]) {
         c8.pc += 2;
         decoded_opcode d_op = decode(c8.opcode);
         print_decoded_opcode(d_op, c8.opcode);
-        if (execute(d_op, &c8, argc, argv) != 0) {
+        if (execute(d_op, &c8) != 0) {
             return 1;
         }
         // Draw everything

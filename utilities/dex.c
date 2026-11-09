@@ -37,7 +37,7 @@ decoded_opcode decode(uint16_t opcode) {
     return d_op;
 }
 
-int execute(decoded_opcode d_op, chip8 *c8, int argc, char *argv[]) {
+int execute(decoded_opcode d_op, chip8 *c8) {
     switch (d_op.first_nibble) {
         case 0x0:
             switch (d_op.nnn) {
@@ -118,59 +118,45 @@ int execute(decoded_opcode d_op, chip8 *c8, int argc, char *argv[]) {
                     return 0;
                 }
                 case 5: {
+                    int flag;
+                    if (c8->registers[d_op.x] >= c8->registers[d_op.y]) {
+                        flag = 1;
+                    } else {
+                        flag = 0;
+                    }
                     int sub = c8->registers[d_op.x] - c8->registers[d_op.y];
                     c8->registers[d_op.x] = sub;
-                    if (c8->registers[d_op.x] >= c8->registers[d_op.y]) {
-                        c8->registers[0xF] = 1;
-                    } else {
-                        c8->registers[0xF] = 0;
-                    }
+                    c8->registers[0xF] = flag;
                     return 0;
                 }
                 case 7: {
+                    int flag;
+                    if (c8->registers[d_op.y] >= c8->registers[d_op.x]) {
+                        flag = 1;
+                    } else {
+                        flag = 0;
+                    }
                     int sub = c8->registers[d_op.y] - c8->registers[d_op.x];
                     c8->registers[d_op.x] = sub;
-                    if (c8->registers[d_op.y] >= c8->registers[d_op.x]) {
-                        c8->registers[0xF] = 1;
-                    } else {
-                        c8->registers[0xF] = 0;
-                    }
+                    c8->registers[0xF] = flag;
                     return 0;
                 }
                 case 6: {
-                    // TODO
-                    char shifted_out_bit;
-                    /* if (argc == 3) { */
-                    /*     if (argc[3] == "shift-in-place") { */
-                    /*         shifted_out_bit = c8->registers[d_op.x]; */
-                    /*         c8->registers[d_op.x] = c8->registers[d_op.x] >> 1; */
-                    /*         return 0; */
-                    /*     } else { */
-                    /*         fprintf(stderr, "Unknown arg 3"); */
-                    /*         return 1; */
-                    /*     } */
-                    /* } */
-                    shifted_out_bit = c8->registers[d_op.y];
-                    c8->registers[d_op.x] = c8->registers[d_op.y];
+                    if (c8->shift_uses_vy) {
+                        c8->registers[d_op.x] = c8->registers[d_op.y];
+                    }
+                    uint8_t shifted_out_bit = c8->registers[d_op.x] & 1;
                     c8->registers[d_op.x] = c8->registers[d_op.x] >> 1;
+                    c8->registers[0xF] = shifted_out_bit;
                     return 0;
                 }
                 case 0xE: {
-                    // TODO
-                    char shifted_out_bit;
-                    /* if (argc == 3) { */
-                    /*     if (argc[3] == "shift-in-place") { */
-                    /*         shifted_out_bit = c8->registers[d_op.x]; */
-                    /*         c8->registers[d_op.x] = c8->registers[d_op.x] >> 1; */
-                    /*         return 0; */
-                    /*     } else { */
-                    /*         fprintf(stderr, "Unknown arg 3"); */
-                    /*         return 1; */
-                    /*     } */
-                    /* } */
-                    shifted_out_bit = c8->registers[d_op.y];
-                    c8->registers[d_op.x] = c8->registers[d_op.y];
-                    c8->registers[d_op.x] = c8->registers[d_op.x] >> 1;
+                    if (c8->shift_uses_vy) {
+                        c8->registers[d_op.x] = c8->registers[d_op.y];
+                    }
+                    uint8_t shifted_out_bit = c8->registers[d_op.x];
+                    c8->registers[d_op.x] = c8->registers[d_op.x] << 1;
+                    c8->registers[0xF] = (shifted_out_bit >> 7) & 1;
                     return 0;
                 }
                 default:
