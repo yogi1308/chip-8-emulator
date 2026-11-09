@@ -1,6 +1,7 @@
 #include "../headers/loaders.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "../chip8.h"
@@ -17,15 +18,25 @@ int load_flags(chip8 *c8, int argc, char *argv[]) {
         if (argv[i][0] == '-') {
             if (strcmp(argv[i], "--shift-uses-vy") == 0) {
                 c8->shift_uses_vy = true;
-            } 
-            else if (strcmp(argv[i], "--bxnn") == 0) {
+            } else if (strcmp(argv[i], "--bxnn") == 0) {
                 c8->bxnn = true;
             } else if (strcmp(argv[i], "--hex-keys") == 0) {
                 c8->hex_keys = true;
             } else if (strcmp(argv[i], "--inc-i") == 0) {
                 c8->inc_i = true;
-            }
-            else {
+            } else if (strcmp(argv[i], "--speed") == 0) {
+                if (i + 1 >= argc) {
+                    fprintf(stderr, "--speed needs a number\n");
+                    return 1;
+                }
+                char *end;
+                long v = strtol(argv[++i], &end, 10); // ++i consumes the value
+                if (*end != '\0' || v < 1 || v > 1000) {
+                    fprintf(stderr, "Invalid speed '%s' (expected 1-1000 instructions per frame)\n", argv[i]);
+                    return 1;
+                }
+                c8->speed = (int)v;
+            } else {
                 fprintf(stderr, "Unknown flag %s\n", argv[i]);
                 return 1;
             }
@@ -45,6 +56,10 @@ int load_rom(uint8_t *memory, int argc, char *argv[]) {
     char *filepath = NULL;
     if (argc > 1) {
         for (int i = 1; i < argc; i++) {
+            if (strcmp(argv[i], "--speed") == 0) {
+                i++; // skip the number
+                continue;
+            }
             if (argv[i][0] != '-') {
                 fp = fopen(argv[i], "rb");
                 filepath = argv[i];

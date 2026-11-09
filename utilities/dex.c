@@ -8,6 +8,14 @@
 
 uint16_t fetch(uint8_t *memory, uint16_t pc) { return (memory[pc] << 8) | memory[pc + 1]; }
 
+static int out_of_bounds(chip8 *c8, int count) {
+    if (c8->I + count > MEMORY_SIZE) {
+        fprintf(stderr, "Memory out of bounds: I=0x%04X, count=%d, pc=0x%04X\n", c8->I, count, c8->pc - 2);
+        return 1;
+    }
+    return 0;
+}
+
 void print_decoded_opcode(decoded_opcode d_op, uint16_t opcode) {
     printf("\n\nopcode = 0x%04X\n", opcode);
     printf("first_nibble = 0x%01X\n", d_op.first_nibble);
@@ -65,8 +73,8 @@ int execute(decoded_opcode d_op, chip8 *c8) {
             c8->pc = d_op.nnn;
             return 0;
         case 0x2:
-            if (c8->stack_pointer >= 16) {
-                fprintf(stderr, "Stack overflowed. Limit is 16 0x%04X at 0x%04X\n", d_op.op, c8->pc - 2);
+            if (c8->stack_pointer >= STACK_HEIGHT) {
+                fprintf(stderr, "Stack overflowed. Limit is %d 0x%04X at 0x%04X\n", STACK_HEIGHT, d_op.op, c8->pc - 2);
                 return 1;
             }
             c8->stack[c8->stack_pointer] = c8->pc;
@@ -184,6 +192,8 @@ int execute(decoded_opcode d_op, chip8 *c8) {
             return 0;
         case 0xD: {
             // sprites are 8 pixel wide and n pixels tall
+            if (out_of_bounds(c8, d_op.n))
+                return 1;
             uint8_t x = c8->registers[d_op.x] % 64;
             uint8_t y = c8->registers[d_op.y] % 32;
             uint8_t h = d_op.n;
@@ -205,68 +215,88 @@ int execute(decoded_opcode d_op, chip8 *c8) {
             }
             return 0;
         }
-        case 0xE:
+        case 0xE: {
+            uint8_t key = c8->registers[d_op.x] & 0xF;
+            bool pressed = c8->keyboard[key];
             switch (d_op.nn) {
                 case 0x9E:
-                    if (c8->key_pressed == c8->registers[d_op.x]) {
+                    if (pressed) {
                         c8->pc += 2;
                     }
-                    break;
+                    return 0;
                 case 0xA1:
-                    if (c8->key_pressed != c8->registers[d_op.x]) {
+                    if (!pressed) {
                         c8->pc += 2;
                     }
-                    break;
+                    return 0;
                 default:
                     fprintf(stderr, "Unknown opcode 0x%04X at 0x%04X\n", d_op.op, c8->pc - 2);
                     return 1;
             }
             return 0;
+        }
         case 0xF:
             switch (d_op.nn) {
                 case 0x07:
                     c8->registers[d_op.x] = c8->delay_timer;
-                    break;
+                    return 0;
                 case 0x15:
                     c8->delay_timer = c8->registers[d_op.x];
-                    break;
+                    return 0;
                 case 0x18:
                     c8->sound_timer = c8->registers[d_op.x];
-                    break;
+                    return 0;
                 case 0x1E:
                     c8->I += c8->registers[d_op.x];
-                    break;
-                case 0x0A:
-                    if (c8->key_pressed != -1) {
-                        c8->registers[d_op.x] = c8->key_pressed;
-                        return 0;
+                    if (c8->I > 0xFFF) {
+                        c8->registers[0xF] = 1;
                     }
-                    c8->pc -= 2;
-                    break;
+                    return 0;
+                case 0x0A:
+                    for (int k = 0; k < 16; k++) {
+                        if (c8->keyboard[k]) {
+                            c8->registers[d_op.x] = k;
+                            return 0;
+                        }
+                    }
+                    c8->pc -= 2; // no key down: repeat this instruction
+                    return 0;
                 case 0x29:
                     c8->I = FONT_SET_START_ADDRESS + 5 * (c8->registers[d_op.x] & 0xF);
-                    break;
-                case 0x33:
+                    return 0;
+                case 0x33: {
+                    if (out_of_bounds(c8, 3))
+                        return 1;
                     uint8_t val = c8->registers[d_op.x];
                     c8->memory[c8->I] = (val / 100);
                     c8->memory[c8->I + 1] = (val % 100) / 10;
                     c8->memory[c8->I + 2] = val % 10;
-                    break;
+                    return 0;
+                }
                 case 0x55:
+                    if (out_of_bounds(c8, d_op.x + 1))
+                        return 1;
                     for (int i = 0; i <= d_op.x; i++) {
                         c8->memory[c8->I + i] = c8->registers[i];
                     }
-                    break;
+                    if (c8->inc_i) {
+                        c8->I += d_op.x + 1;
+                    }
+                    return 0;
                 case 0x65:
+                    if (out_of_bounds(c8, d_op.x + 1))
+                        return 1;
                     for (int i = 0; i <= d_op.x; i++) {
                         c8->registers[i] = c8->memory[c8->I + i];
                     }
                     if (c8->inc_i) {
                         c8->I += d_op.x + 1;
                     }
-                    break;
+                    return 0;
+                default:
+                    fprintf(stderr, "Unknown opcode 0x%04X at 0x%04X\n", d_op.op, c8->pc - 2);
+                    return 1;
             }
-            return 0;
         default:
             fprintf(stderr, "Unknown opcode 0x%04X at 0x%04X\n", d_op.op, c8->pc - 2);
             return 1;
