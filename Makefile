@@ -1,4 +1,4 @@
-ROM ?= roms/tetris.ch8
+ROM ?= "roms/danm8ku.ch8"
 CC = gcc
 CFLAGS = -Wall -Wextra
 SRC = main.c $(wildcard utilities/*.c)
@@ -15,7 +15,7 @@ release: $(SRC) $(HDRS)
 	$(CC) $(CFLAGS) -O3 $(SRC) -o main $(LDLIBS)
 
 run: main
-	./main $(ROM)
+	./main $(ROM) --shift-uses-vy --inc-i --speed 500
 
 clean:
 	rm -f main
