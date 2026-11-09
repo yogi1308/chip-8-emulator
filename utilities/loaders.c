@@ -22,6 +22,8 @@ int load_flags(chip8 *c8, int argc, char *argv[]) {
                 c8->bxnn = true;
             } else if (strcmp(argv[i], "--hex-keys") == 0) {
                 c8->hex_keys = true;
+            } else if (strcmp(argv[i], "--inc-i") == 0) {
+                c8->inc_i = true;
             }
             else {
                 fprintf(stderr, "Unknown flag %s\n", argv[i]);

@@ -22,13 +22,12 @@ typedef struct chip8 {
     bool bxnn;
     bool hex_keys;
     int key_pressed;
+    bool inc_i;
 } chip8;
 
 static inline chip8 init_chip8(void) {
     chip8 c8 = {0};
     c8.pc = PC_START_ADDRESS;
-    c8.delay_timer = 60;
-    c8.sound_timer = 0;
     c8.key_pressed = -1;
     return c8;
 }
@@ -40,5 +39,5 @@ typedef struct decoded_opcode {
     int y;
     int n;
     uint8_t nn;
-    int16_t nnn; // lower 4 bits are zeros
+    uint16_t nnn; // lower 4 bits are zeros
 } decoded_opcode;

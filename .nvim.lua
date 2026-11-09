@@ -113,7 +113,7 @@ vim.keymap.set("n", "<leader>dc", function()
         type = "codelldb",
         request = "launch",
         program = program,
-        args = { "tests/IBM_Logo.ch8" },
+        args = { "tests/BC_test.ch8" },
         cwd = root,
         stopOnEntry = false,
     })

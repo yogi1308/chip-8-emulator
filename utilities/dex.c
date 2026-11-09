@@ -235,6 +235,7 @@ int execute(decoded_opcode d_op, chip8 *c8) {
                     break;
                 case 0x1E:
                     c8->I += c8->registers[d_op.x];
+                    break;
                 case 0x0A:
                     if (c8->key_pressed != -1) {
                         c8->registers[d_op.x] = c8->key_pressed;
@@ -243,13 +244,27 @@ int execute(decoded_opcode d_op, chip8 *c8) {
                     c8->pc -= 2;
                     break;
                 case 0x29:
-                    c8->I = c8->registers[d_op.x];
+                    c8->I = FONT_SET_START_ADDRESS + 5 * (c8->registers[d_op.x] & 0xF);
                     break;
                 case 0x33:
                     uint8_t val = c8->registers[d_op.x];
                     c8->memory[c8->I] = (val / 100);
                     c8->memory[c8->I + 1] = (val % 100) / 10;
                     c8->memory[c8->I + 2] = val % 10;
+                    break;
+                case 0x55:
+                    for (int i = 0; i <= d_op.x; i++) {
+                        c8->memory[c8->I + i] = c8->registers[i];
+                    }
+                    break;
+                case 0x65:
+                    for (int i = 0; i <= d_op.x; i++) {
+                        c8->registers[i] = c8->memory[c8->I + i];
+                    }
+                    if (c8->inc_i) {
+                        c8->I += d_op.x + 1;
+                    }
+                    break;
             }
             return 0;
         default:
