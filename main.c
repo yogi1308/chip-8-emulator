@@ -88,9 +88,5 @@ int main(int argc, char *argv[]) {
     // De-initialize and cleanup window
     cleanup(&beep);
 
-    // print memory
-    /* for (int i = 0; i < MEMORY_SIZE; i++) { */
-    /*     printf("0x%02X %d\n", memory[i], i); */
-    /* } */
     return 0;
 }
